@@ -3,18 +3,34 @@
 # Set up the project name and base directory
 PROJECT_NAME="vulnerability_scanner"
 BASE_DIR=$(pwd)/$PROJECT_NAME
+SECLISTS_DIR="/usr/share/seclists"
 
-# Create the directory structure
-echo "Creating directory structure..."
-mkdir -p $BASE_DIR/{scanners,payloads/{sql_injection,xss,directory_traversal,lfi},reports,logs}
+# Function to create directories
+create_directories() {
+    echo "Creating directory structure..."
+    mkdir -p $BASE_DIR/{scanners,payloads/{sql_injection,xss,directory_traversal,lfi},reports,logs}
+}
 
-# Create the __init__.py files for Python packages
-echo "Creating __init__.py files..."
-touch $BASE_DIR/scanners/__init__.py
+# Function to copy payloads from SecLists
+copy_payloads() {
+    echo "Copying payloads from SecLists..."
 
-# Create the payload loader module
-echo "Creating payload_loader.py..."
-cat > $BASE_DIR/scanners/payload_loader.py <<EOL
+    cp $SECLISTS_DIR/Fuzzing/SQLi.txt $BASE_DIR/payloads/sql_injection/ || echo "SQLi payloads not found"
+    cp $SECLISTS_DIR/Fuzzing/XSS.txt $BASE_DIR/payloads/xss/ || echo "XSS payloads not found"
+    cp $SECLISTS_DIR/Fuzzing/LFI/LFI.txt $BASE_DIR/payloads/lfi/ || echo "LFI payloads not found"
+    cp $SECLISTS_DIR/Discovery/Web-Content/common.txt $BASE_DIR/payloads/directory_traversal/ || echo "Directory Traversal payloads not found"
+}
+
+# Function to create the __init__.py files for Python packages
+create_init_py() {
+    echo "Creating __init__.py files..."
+    touch $BASE_DIR/scanners/__init__.py
+}
+
+# Function to create the payload loader module
+create_payload_loader() {
+    echo "Creating payload_loader.py..."
+    cat > $BASE_DIR/scanners/payload_loader.py <<EOL
 import glob
 
 def load_payloads(directory):
@@ -24,10 +40,12 @@ def load_payloads(directory):
             payloads.extend(f.read().splitlines())
     return payloads
 EOL
+}
 
-# Create the request engine module
-echo "Creating request_engine.py..."
-cat > $BASE_DIR/scanners/request_engine.py <<EOL
+# Function to create the request engine module
+create_request_engine() {
+    echo "Creating request_engine.py..."
+    cat > $BASE_DIR/scanners/request_engine.py <<EOL
 import requests
 
 def send_request(url, payload, headers=None, proxy=None):
@@ -38,10 +56,12 @@ def send_request(url, payload, headers=None, proxy=None):
         print(f"Request failed: {e}")
         return None
 EOL
+}
 
-# Create the SQL Injection scanner module
-echo "Creating sql_injection_scanner.py..."
-cat > $BASE_DIR/scanners/sql_injection_scanner.py <<EOL
+# Function to create the SQL Injection scanner module
+create_sql_injection_scanner() {
+    echo "Creating sql_injection_scanner.py..."
+    cat > $BASE_DIR/scanners/sql_injection_scanner.py <<EOL
 from .payload_loader import load_payloads
 from .request_engine import send_request
 import logging
@@ -55,10 +75,12 @@ def scan_sql_injection(url):
             return True
     return False
 EOL
+}
 
-# Create the XSS scanner module
-echo "Creating xss_scanner.py..."
-cat > $BASE_DIR/scanners/xss_scanner.py <<EOL
+# Function to create the XSS scanner module
+create_xss_scanner() {
+    echo "Creating xss_scanner.py..."
+    cat > $BASE_DIR/scanners/xss_scanner.py <<EOL
 from .payload_loader import load_payloads
 from .request_engine import send_request
 import logging
@@ -72,10 +94,12 @@ def scan_xss(url):
             return True
     return False
 EOL
+}
 
-# Create the Directory Traversal scanner module
-echo "Creating directory_traversal_scanner.py..."
-cat > $BASE_DIR/scanners/directory_traversal_scanner.py <<EOL
+# Function to create the Directory Traversal scanner module
+create_directory_traversal_scanner() {
+    echo "Creating directory_traversal_scanner.py..."
+    cat > $BASE_DIR/scanners/directory_traversal_scanner.py <<EOL
 from .payload_loader import load_payloads
 from .request_engine import send_request
 import logging
@@ -89,10 +113,12 @@ def scan_directory_traversal(url):
             return True
     return False
 EOL
+}
 
-# Create the LFI scanner module
-echo "Creating lfi_scanner.py..."
-cat > $BASE_DIR/scanners/lfi_scanner.py <<EOL
+# Function to create the LFI scanner module
+create_lfi_scanner() {
+    echo "Creating lfi_scanner.py..."
+    cat > $BASE_DIR/scanners/lfi_scanner.py <<EOL
 from .payload_loader import load_payloads
 from .request_engine import send_request
 import logging
@@ -106,10 +132,12 @@ def scan_lfi(url):
             return True
     return False
 EOL
+}
 
-# Create the main.py file
-echo "Creating main.py..."
-cat > $BASE_DIR/main.py <<EOL
+# Function to create the main.py file
+create_main_py() {
+    echo "Creating main.py..."
+    cat > $BASE_DIR/main.py <<EOL
 import logging
 from scanners.sql_injection_scanner import scan_sql_injection
 from scanners.xss_scanner import scan_xss
@@ -136,10 +164,12 @@ def main():
 if __name__ == "__main__":
     main()
 EOL
+}
 
-# Create the README.md file
-echo "Creating README.md..."
-cat > $BASE_DIR/README.md <<EOL
+# Function to create the README.md file
+create_readme_md() {
+    echo "Creating README.md..."
+    cat > $BASE_DIR/README.md <<EOL
 # Vulnerability Scanner
 
 This project is a comprehensive vulnerability scanner built with Python and Bash. It leverages various payloads to detect common web application vulnerabilities such as SQL Injection, XSS, Directory Traversal, and Local File Inclusion (LFI).
@@ -189,12 +219,29 @@ Feel free to submit issues or pull requests to improve this scanner.
 
 This project is licensed under the MIT License.
 EOL
+}
 
-# Create the requirements.txt file
-echo "Creating requirements.txt..."
-cat > $BASE_DIR/requirements.txt <<EOL
+# Function to create the requirements.txt file
+create_requirements_txt() {
+    echo "Creating requirements.txt..."
+    cat > $BASE_DIR/requirements.txt <<EOL
 requests
 EOL
+}
+
+# Create the entire project structure and files
+create_directories
+copy_payloads
+create_init_py
+create_payload_loader
+create_request_engine
+create_sql_injection_scanner
+create_xss_scanner
+create_directory_traversal_scanner
+create_lfi_scanner
+create_main_py
+create_readme_md
+create_requirements_txt
 
 # Provide completion message
 echo "Vulnerability Scanner project structure created successfully at $BASE_DIR"
